@@ -6,6 +6,12 @@ from korail2 import *
 def index(request):
     return render(request, 'index.html')
 
+def note(request):
+    return render(request, 'note.md')
+
+def history(request):
+    return render(request, 'history.md')
+
 def reservation(request):
     TRAIN_TYPE = [
         ('05','전체(ALL)'),

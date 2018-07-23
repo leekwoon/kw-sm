@@ -20,6 +20,8 @@ from auto_reservation import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('note/', views.note),
+    path('history/', views.history),
     path('', views.index),
     path('reservation/', views.reservation),
     path('auth', views.auth),

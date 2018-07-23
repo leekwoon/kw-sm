@@ -37,7 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'auto_reservation.apps.AutoReservationConfig'
+    'auto_reservation.apps.AutoReservationConfig',
+    # To use markdown
+    # pip install django-markdown-deux
+    # See https://github.com/trentm/django-markdown-deux
+    'markdown_deux', 
 ]
 
 MIDDLEWARE = [
