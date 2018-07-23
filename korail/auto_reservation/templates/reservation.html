@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% block contents %}
+<form>
+	{% csrf_token %}
+  <div class="form-group row">
+    <label for="inputEmail3" class="col-sm-2 col-form-label">Korail ID</label>
+    <div class="col-sm-10">
+      <input type="id" value="1270056717" class="form-control" id="id" placeholder="membership number, email, phone number">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
+    <div class="col-sm-10">
+      <input type="password" class="form-control" id="pw" placeholder="Password">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="inputEmail3" class="col-sm-2 col-form-label">목적지</label>
+    <div class="col-sm-10">
+      <input type="text" value="서울" class="form-control" id="dep" placeholder="membership number, email, phone number">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="inputEmail3" class="col-sm-2 col-form-label">도착지</label>
+    <div class="col-sm-10">
+      <input type="text" value="부산" class="form-control" id="arr" placeholder="membership number, email, phone number">
+    </div>
+  </div>
+  <fieldset class="form-group">
+    <div class="row">
+      <legend class="col-form-label col-sm-2 pt-0">Passengers(Adult)</legend>
+      <div class="col-sm-10">
+      	<select class="form-control" id="adult_passenger">
+	      	{% for p in PASSENGERS %}
+	      		{% if p == 1 %}
+    			<option value="{{p}}" selected="">{{p}}</option>
+	    		{% else %}
+	    		<option value="{{p}}">{{p}}</option>
+	    		{% endif %}
+	    	{% endfor%}
+    	</select>
+  	  </div>
+    </div>
+  </fieldset>
+  <fieldset class="form-group">
+    <div class="row">
+      <legend class="col-form-label col-sm-2 pt-0">Passengers(Child)</legend>
+      <div class="col-sm-10">
+      	<select class="form-control" id="child_passenger">
+	      	{% for p in PASSENGERS %}
+	    	<option value="{{p}}">{{p}}</option>
+	    	{% endfor%}
+    	</select>
+  	  </div>
+    </div>
+  </fieldset>
+  <fieldset class="form-group">
+    <div class="row">
+      <legend class="col-form-label col-sm-2 pt-0">Passengers(Senior)</legend>
+      <div class="col-sm-10">
+      	<select class="form-control" id="senior_passenger">
+	      	{% for p in PASSENGERS %}
+	    	<option value="{{p}}">{{p}}</option>
+	    	{% endfor%}
+    	</select>
+  	  </div>
+    </div>
+  </fieldset>
+
+  <button type="button" class="btn btn-primary btn-block" id='auth_btn' onclick="saveConfig_Auth()">Save config & Auth</button>
+
+  <hr>
+  <fieldset class="form-group">
+    <div class="row">
+      <legend class="col-form-label col-sm-2 pt-0">Train Type</legend>
+      <div class="col-sm-10">
+        <select class="form-control" id="train_type">
+        	{% for k,v in TRAIN_TYPE %}
+        	<option value="{{k}}">{{v}}</option>
+        	{% endfor%}
+	    </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="form-group">
+    <div class="row">
+      <legend class="col-form-label col-sm-2 pt-0">Date</legend>
+      <div class="col-sm-10">
+        <div id="datepicker"></div>
+	  </div>
+    </div>
+  </fieldset>
+
+  <div class="form-group row">
+    <div class="col-sm-2">Hour</div>
+    <div class="col-sm-10">
+      <select class="form-control" id="hour">
+    	{% for h in HOURS %}
+    	<option value="{{h}}">{{h}}</option>
+    	{% endfor%}
+    </select>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <div class="col-sm-2">MINUTES</div>
+    <div class="col-sm-10">
+      <select class="form-control" id="min">
+        	{% for m in MINUTES %}
+        	<option value="{{m}}">{{m}}</option>
+        	{% endfor%}
+	    </select>
+    </div>
+  </div>
+
+  <div class="form-group form-check">
+    <input type="checkbox" class="form-check-input" id="search_all">
+    <label class="form-check-label" for="search_all">Search All</label>
+  </div>
+
+  <div class="form-group form-check">
+    <input type="checkbox" class="form-check-input" id="no_seat">
+    <label class="form-check-label" for="no_seat">Wanna See No-Seat</label>
+  </div>
+
+  <div class="form-group row">
+  	<button type="button" class="btn btn-primary btn-block" id='search_train_btn' onclick="search_train()" disabled>Search Train</button>
+  </div>
+
+  <hr>
+
+  <div id="trains">
+  </div>	
+
+  <button type="button" class="btn btn-primary btn-block" id='reservate_btn' onclick="reservate()" disabled>예매!</button>
+
+</form>
+{% endblock %}
+
+{% block script %}
+ <script type="text/javascript">
+ 	var selected_train_idx = -1
+
+ 	let saveConfig_Auth = () => {
+ 		console.log('hi?')
+ 		let data = {
+ 			id: $('#id').val(),
+ 			pw: $('#pw').val(),
+ 			adult_passenger: $('#adult_passenger').val(),
+ 			child_passenger: $('#child_passenger').val(),
+ 			senior_passenger: $('#senior_passenger').val(),
+ 			csrfmiddlewaretoken : $('input[name="csrfmiddlewaretoken"]').val()
+ 		}
+
+ 		console.log(data)
+ 		$('button').attr('disabled',true)
+ 		$.ajax({
+ 			url: '/auth',
+ 			method: 'post',
+ 			data: data,
+ 			dataType: 'json',
+ 			success: (response) => {
+ 				console.log(response)
+ 				if (response.auth==='fail') {
+ 					alert('코레일 로그인 인증 실패')
+ 					$('#auth_btn').attr('disabled',false)
+ 				} else {
+ 					alert('인증 성공!! 열차를 선택하세요')
+ 					setCookie('pw',$('#pw').val())
+ 					$('#id,#pw,#adult_passenger,#dep,#arr,#child_passenger,#senior_passenger').attr('disabled',true)
+ 					$('#search_train_btn').attr('disabled',false)
+ 				}
+ 				
+ 			}
+ 		})
+ 	}
+
+ 	let search_train = () => {
+ 		console.log('search_train')
+ 		selected_train_idx = -1
+ 		$('#reservate_btn').attr('disabled',true)
+ 		let data = {
+ 			id: $('#id').val(),
+ 			pw: $('#pw').val(),
+ 			adult_passenger: $('#adult_passenger').val(),
+ 			child_passenger: $('#child_passenger').val(),
+ 			senior_passenger: $('#senior_passenger').val(),
+ 			train_type: $('#train_type').val(),
+ 			datepicker: $('#datepicker').val(),
+ 			hour: $('#hour').val(),
+ 			min: $('#min').val(),
+ 			dep: $('#dep').val(),
+ 			arr: $('#arr').val(),
+ 			search_all: $('#search_all').is(':checked'),
+ 			no_seat: $('#no_seat').is(':checked'),
+ 			csrfmiddlewaretoken : $('input[name="csrfmiddlewaretoken"]').val()
+ 		}
+
+ 		console.log(data)
+ 		$('#search_train_btn').attr('disabled',true)
+ 		$.ajax({
+ 			url: '/search',
+ 			method: 'post',
+ 			data: data,
+ 			dataType: 'json',
+ 			success: (response) => {
+ 				console.log(response)
+ 				$('#trains').text('')
+ 				let idx = 0
+ 				for (let train of response.result) {
+ 					let a = '';
+	 				a += '<div class="input-group mb-3">'
+					a +=  '<div class="input-group-prepend">'
+					a +=    '<div class="input-group-text">'
+					a +=      `<input type="radio" name="checked_train" value="${idx}" onchange="train_select(${idx})">`
+					a +=    '</div>'
+					a +=  '</div>'
+					a +=  `<input type="text" class="form-control" value="${train}" readonly>`
+					a +='</div>'
+					$('#trains').append(a)
+					idx = idx+1
+ 				}
+ 				$('#search_train_btn').attr('disabled',true)
+ 			}
+ 		})
+
+
+ 	}
+
+ 	let train_select = (idx) => {
+ 		console.log(idx)
+ 		selected_train_idx = idx
+ 		$('#reservate_btn').attr('disabled',false)
+ 	}
+ </script>
+{% endblock %}

@@ -16,6 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from auto_reservation import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.index),
+    path('reservation/', views.reservation),
+    path('auth', views.auth),
+    path('search', views.search)
 ]
